@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MERA BOX</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>MERA BOX</h1>
+  <input type="text" id="videoUrl" placeholder="Paste your video link here..." />
+  <br>
+  <button onclick="playVideo()">Play Online</button>
+  <select id="formatSelect">
+    <option value="mp4">MP4</option>
+    <option value="3gp">3GP</option>
+    <option value="720">720p</option>
+    <option value="full hd">Full HD</option>
+    <option value="4k">4K</option>
+  </select>
+  <button onclick="downloadVideo()">Download</button>
+  <iframe id="videoPlayer" allowfullscreen></iframe>
+
+  <div id="ad-container"></div>
+  <script src="script.js"></script>
+</body>
+</html>
