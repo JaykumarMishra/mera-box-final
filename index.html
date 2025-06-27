@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MERA BOX</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #ffcc00;
+      margin-bottom: 1rem;
+    }
+    input, select, button {
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px;
+      border: none;
+      font-weight: bold;
+    }
+    button {
+      background-color: #ffcc00;
+      color: #000;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ffaa00;
+    }
+    iframe {
+      width: 90%;
+      max-width: 600px;
+      height: 320px;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>MERA BOX</h1>
+
+  <input type="text" id="videoUrl" placeholder="Paste video link..." />
+  <br>
+
+  <button onclick="playVideo()">▶️ Play Online</button>
+  <select id="formatSelect">
+    <option value="mp4">MP4</option>
+    <option value="3gp">3GP</option>
+    <option value="720">720p</option>
+    <option value="full hd">Full HD</option>
+    <option value="4k">4K</option>
+  </select>
+  <button onclick="downloadVideo()">⬇️ Download</button>
+
+  <br><br>
+
+  <label>
+    <input type="checkbox" id="premiumToggle" onchange="togglePremium()" />
+    Premium Mode (No Ads)
+  </label>
+  <p id="priceText" style="font-weight: bold;"></p>
+  <button onclick="subscribePremium()">Subscribe Now</button>
+
+  <div id="ad-container" style="margin-top: 20px;">Ad appears here...</div>
+
+  <iframe id="videoPlayer" allowfullscreen></iframe>
+
+  <script src="script.js"></script>
+</body>
+</html>
