@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MERA BOX</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #ffcc00;
+      text-shadow: 2px 2px #000;
+    }
+    input[type="text"] {
+      width: 90%;
+      max-width: 500px;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 1rem;
+    }
+    button, select {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      background-color: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ffaa00;
+    }
+    iframe {
+      margin-top: 1rem;
+      width: 90%;
+      max-width: 600px;
+      height: 300px;
+      display: none;
+    }
+    label {
+      margin: 1rem 0;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>MERA BOX</h1>
+
+  <input type="text" id="videoUrl" placeholder="Paste your YouTube video link here..." />
+  <br>
+
+  <button onclick="playVideo()">Play Online</button>
+
+  <select id="formatSelect">
+    <option value="mp4">MP4</option>
+    <option value="3gp">3GP</option>
+    <option value="720">720p</option>
+    <option value="full hd">Full HD</option>
+    <option value="4k">4K</option>
+  </select>
+  <button onclick="downloadVideo()">Download</button>
+
+  <!--  Premium Toggle -->
+  <div>
+    <label>
+      <input type="checkbox" id="premiumToggle" onchange="togglePremium()" />
+      Premium Mode (No Ads)
+    </label>
+  </div>
+  <p id="priceText" style="margin-top: 10px; font-weight: bold;"></p>
+
+  <!--  Subscribe Button -->
+  <button onclick="subscribePremium()" style="margin-top: 10px;">Subscribe Now</button>
+
+  <!--  Ad Container -->
+  <div id="ad-container" style="margin-top: 20px;">Ad will appear here...</div>
+
+  <!--  Video Player -->
+  <iframe id="videoPlayer" allowfullscreen></iframe>
+
+  <!--  JavaScript Logic -->
+  <script>
+    const backendUrl = "https://mera-box-backend-1.onrender.com";
+
+    function playVideo() {
+      const url = document.getElementById("videoUrl").value;
+      const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+
+      if (!match) {
+        alert("Invalid YouTube URL!");
+        return;
+      }
+
+      const videoId = match[1];
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      const iframe = document.getElementById("videoPlayer");
+      iframe.style.display = "block";
+      iframe.src = embedUrl;
+    }
+
+    async function downloadVideo() {
+      const url = document.getElementById("videoUrl").value;
+      const format = document.getElementById("formatSelect").value;
+
+      const response = await fetch(`${backendUrl}/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, format })
+      });
+
+      if (!response.ok) {
+        alert("Download failed!");
+        return;
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "video." + format;
+      a.click();
+    }
+
+    function togglePremium() {
+      const isPremium = document.getElementById("premiumToggle").checked;
+      const adContainer = document.getElementById("ad-container");
+      adContainer.innerHTML = "";
+
+      if (!isPremium) {
+        const script1 = document.createElement("script");
+        script1.innerHTML = `
+          atOptions = {
+            'key' : 'd3f53565f5d79747627b0d392b1739d2',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        `;
+        const script2 = document.createElement("script");
+        script2.src = "//www.highperformanceformat.com/d3f53565f5d79747627b0d392b1739d2/invoke.js";
+        adContainer.appendChild(script1);
+        adContainer.appendChild(script2);
+      }
+    }
+
+    function subscribePremium() {
+      const options = {
+        "key": "rzp_test_eo1T9nmNdxseLx",
+        "amount": 1000, // 10 in paisa
+        "currency": "INR",
+        "name": "Jay Premium",
+        "description": "Payment for premium access",
+        "handler": function (response) {
+          alert("Payment successful! ID: " + response.razorpay_payment_id);
+          document.getElementById("premiumToggle").checked = true;
+          togglePremium();
+        },
+        "prefill": {
+          "name": "Jaykumar Mishra",
+          "email": "demo@example.com",
+          "contact": "9876543210"
+        },
+        "theme": {
+          "color": "#3399cc"
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    async function detectCountryAndSetPrice() {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        const currency = data.currency;
+        const country = data.country_name;
+
+        let price = "";
+        switch (currency) {
+          case "INR": price = "10/month"; break;
+          case "USD": price = "$0.15/month"; break;
+          case "EUR": price = "€0.13/month"; break;
+          default: price = `${currency} 0.20/month`;
+        }
+
+        document.getElementById("priceText").textContent =
+          `Premium Price: ${price} (${country})`;
+
+      } catch (err) {
+        document.getElementById("priceText").textContent = "Premium Price: 10/month";
+      }
+    }
+
+    window.onload = () => {
+      togglePremium();
+      detectCountryAndSetPrice();
+    };
+  </script>
+
+</body>
+</html>
